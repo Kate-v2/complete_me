@@ -50,17 +50,18 @@ class CompleteMe
     end
 
   end
-  
+
   def count(node = @root)
     #binding.pry
-    return 1 if node.nodes.length == 0
+    return 0 if node.nodes.size == 0
 
     sum = 0
     node.nodes.values.each do |node|
-          binding.pry
-      if thisnode[0].is_word
-        sum += count(node)
+          #binding.pry
+      if node.is_word
+        sum += 1
       end
+      sum += count(node)
     end
     sum
   end
@@ -75,9 +76,10 @@ test_library = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
 complete_me = CompleteMe.new()
 
 dictionary = File.read("/usr/share/dict/words")
-complete_me.populate(test_library)
-binding.pry
-
+#complete_me.populate(test_library)
+complete_me.populate(dictionary)
+#binding.pry
+p complete_me.count
 # complete_me.insert("pizza")
 # complete_me.insert("pizzaria")
 # binding.pry
