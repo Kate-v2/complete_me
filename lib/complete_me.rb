@@ -50,7 +50,20 @@ class CompleteMe
     end
 
   end
+  
+  def count(node = @root)
+    #binding.pry
+    return 1 if node.nodes.length == 0
 
+    sum = 0
+    node.nodes.values.each do |node|
+          binding.pry
+      if thisnode[0].is_word
+        sum += count(node)
+      end
+    end
+    sum
+  end
 
 end
 
