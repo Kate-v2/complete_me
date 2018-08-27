@@ -103,8 +103,8 @@ class CompleteMeTest < Minitest::Test
     list_already_array = ["cat", "catch"]
     assert_equal ["cat", "catch"], complete.to_array(list_already_array)
   end
-
-  def test_it_can_count
+  
+   def test_it_can_count
     # -- Test with small array --
     complete_me_1 = CompleteMe.new()
     test_array = test_library = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
@@ -117,5 +117,37 @@ class CompleteMeTest < Minitest::Test
     complete_me_2.populate(dictionary)
     assert_equal 235886, complete_me_2.count
   end
+
+  #  ---------------------------------------------
+  # select
+
+  def test_it_can_select_a_word
+    skip
+  end
+
+  def test_it_can_find_the_end_node_of_a_word
+    complete = CompleteMe.new
+
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
+    node_5 = Node.new   # via :c
+    node_6 = Node.new   # via :h  --> is_word
+
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+    node_4.nodes[:c] = node_5
+    node_5.nodes[:h] = node_6
+    node_6.is_word = true
+
+    # ------------------
+    # binding.pry
+    assert_equal node_4, complete.find("cat", node_1)
+  end
+
 
 end
