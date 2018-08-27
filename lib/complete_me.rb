@@ -40,8 +40,22 @@ class CompleteMe
     end
   end
 
+  def count(node = @root)
+  return 0 if node.nodes.size == 0
+  sum = 0
+  node.nodes.values.each do |node|
+        #binding.pry
+    if node.is_word
+      sum += 1
+    end
+    sum += count(node)
+  end
+  sum
+end
+
   # -----------------------------
   # Select(prefix, word)
+
 
   def select(prefix, word)
     # prefix - add a :word => count hash  +=
@@ -61,7 +75,6 @@ class CompleteMe
 
 
 end
-
 
 #
 # test_library = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
