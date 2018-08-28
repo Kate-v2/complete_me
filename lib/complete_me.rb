@@ -53,9 +53,15 @@ class CompleteMe
   end
 
   def suggest(substring)
-
-
+    node = find(substring, @root)
+    return [] if node.nodes.size == 0
+    node.nodes.inject([]) do |suggestions, key_value_pair|
+      word = substring + key_value_pair[0].to_s
+      suggestions << word if key_value_pair[1].is_word
+      suggestions + suggest(word)
+    end
   end
+
 
   # -----------------------------
   # Select(prefix, word)
@@ -90,12 +96,12 @@ end
 # test_library = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
 #
 #
-# complete_me = CompleteMe.new()
-#
-# dictionary = File.read("/usr/share/dict/words")
-# complete_me.populate(test_library)
-# binding.pry
+complete_me = CompleteMe.new()
 
-# complete_me.insert("pizza")
-# complete_me.insert("pizzaria")
-# binding.pry
+dictionary = File.read("/usr/share/dict/words")
+complete_me.populate(dictionary)
+
+suggestions = complete_me.suggest("piz")
+p suggestions[0..4]
+
+#binding.pry

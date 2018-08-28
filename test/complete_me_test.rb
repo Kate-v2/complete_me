@@ -103,11 +103,11 @@ class CompleteMeTest < Minitest::Test
     list_already_array = ["cat", "catch"]
     assert_equal ["cat", "catch"], complete.to_array(list_already_array)
   end
-  
+
    def test_it_can_count
     # -- Test with small array --
     complete_me_1 = CompleteMe.new()
-    test_array = test_library = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
+    test_array = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
     complete_me_1.populate(test_array)
     assert_equal 6, complete_me_1.count
 
@@ -147,6 +147,13 @@ class CompleteMeTest < Minitest::Test
     # ------------------
     # binding.pry
     assert_equal node_4, complete.find("cat", node_1)
+  end
+
+  def test_if_it_can_suggest
+    complete_me = CompleteMe.new()
+    dictionary = File.read("/usr/share/dict/words")
+    complete_me.populate(dictionary)
+    expected = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"], complete_me.suggest("piz")
   end
 
 
