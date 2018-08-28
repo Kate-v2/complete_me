@@ -130,18 +130,15 @@ class CompleteMeTest < Minitest::Test
     # No selections yet
     assert_equal "ca", [node_1.nodes.keys, node_2.nodes.keys].join
     assert_equal 0, node_6.weight
-    # assert_equal nil , node_3.frequent[:catch]
+    assert_equal nil , node_3.frequent[:catch]
 
     complete.select("ca", "catch")
     assert_equal 1, node_6.weight
-    binding.pry
     assert_equal 1 , node_3.frequent[:catch]
 
     complete.select("ca", "catch")
     assert_equal 2, node_6.weight
     assert_equal 2 , node_3.frequent[:catch]
-
-
   end
 
   def test_it_can_find_the_end_node_of_a_word
@@ -163,11 +160,68 @@ class CompleteMeTest < Minitest::Test
     node_5.nodes[:h] = node_6
     node_6.is_word = true
 
-    # ------------------
-    # binding.pry
     assert_equal node_4, complete.find("cat", node_1)
   end
 
+  def test_it_can_match_a_prefix_with_a_frequently_selected_word
+    complete = CompleteMe.new
+
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
+    node_5 = Node.new   # via :c
+    node_6 = Node.new   # via :h  --> is_word
+
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+    node_4.nodes[:c] = node_5
+    node_5.nodes[:h] = node_6
+    node_6.is_word = true
+
+    # No selections yet
+    assert_equal "ca", [node_1.nodes.keys, node_2.nodes.keys].join
+    assert_equal nil , node_3.frequent[:catch]
+
+    complete.select("ca", "catch")
+    assert_equal 1 , node_3.frequent[:catch]
+
+    complete.select("ca", "catch")
+    assert_equal 2 , node_3.frequent[:catch]
+  end
+
+  def test_it_can_add_a_weight_to_a_word_when_selected
+    complete = CompleteMe.new
+
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
+    node_5 = Node.new   # via :c
+    node_6 = Node.new   # via :h  --> is_word
+
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+    node_4.nodes[:c] = node_5
+    node_5.nodes[:h] = node_6
+    node_6.is_word = true
+
+    # No selections yet
+    assert_equal "ca", [node_1.nodes.keys, node_2.nodes.keys].join
+    assert_equal 0, node_6.weight
+
+    complete.select("ca", "catch")
+    assert_equal 1, node_6.weight
+
+    complete.select("ca", "catch")
+    assert_equal 2, node_6.weight
+  end
 
 
 
