@@ -1,9 +1,11 @@
 class Node
-  attr_accessor :is_word, :nodes
+  attr_accessor :is_word, :nodes, :frequent, :weight
 
   def initialize
     @is_word = false
     @nodes = {}
+    @frequent = {}
+    @weight = 0
   end
 
   def exists?(key)

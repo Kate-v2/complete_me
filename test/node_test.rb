@@ -17,6 +17,8 @@ class NodeTest < Minitest::Test
     empty_hash = {}
     assert_equal false, node.is_word
     assert_equal empty_hash, node.nodes
+    assert_equal 0, node.weight
+    assert_equal empty_hash, node.frequent
   end
 
   def test_it_tests_if_nodes_already_exist
