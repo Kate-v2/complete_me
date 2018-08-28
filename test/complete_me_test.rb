@@ -186,6 +186,21 @@ class CompleteMeTest < Minitest::Test
     expected = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"], complete_me.suggest("piz")
   end
 
+  def test_it_can_suggest_based_on_frequency
+    complete_me = CompleteMe.new
+    dictionary = File.read("/usr/share/dict/words")
+    complete_me.populate(dictionary)
+    complete_me.select("piz", "pizzeria")
+    complete_me.select("piz", "pizzeria")
+    complete_me.select("piz", "pizzeria")
+    expected_1 = ["pizzeria", "pize", "pizza", "pizzicato", "pizzle"]
+    assert_equal expected_1, complete_me.suggest("piz")
+    complete_me.select("pi", "pizza")
+    complete_me.select("pi", "pizza")
+    complete_me.select("pi", "pizzicato")
+    expected_2 = ["pizza", "pizzicato", "pize", "pizzeria", "pizzle"]
+    #assert_equal expected_2, complete_me.suggest("pi")
+  end
 
   def test_it_can_match_a_prefix_with_a_frequently_selected_word
     complete = CompleteMe.new

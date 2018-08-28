@@ -56,13 +56,45 @@ class CompleteMe
 
   def suggest(substring)
     node = find(substring, @root)
+    #base case
     return [] if node.nodes.size == 0
-    node.nodes.inject([]) do |suggestions, key_value_pair|
-      word = substring + key_value_pair[0].to_s
-      suggestions << word if key_value_pair[1].is_word
+
+    unweighted = unweighted_suggest(substring, node)
+
+    sorted_hashes = sort_hashes_by_frequency(word)
+
+    sorted_words_by_count = sorted_hashes.map do |hash_array|
+      hash_array[0].to_s
+    end
+
+    (sorted_words_by_count + unweighted).uniq
+
+  end
+
+  def unweighted_suggest(substring, node)
+    node = find(substring, @root)
+    # base case
+    return [] if node.nodes.size == 0
+      # add up arrays, recursively (breaking up node into char symbol and next nodes)
+      node.nodes.inject([]) do |suggestions, (char_sym, node)|
+      # create this word by adding the symbol of this node to the substring
+      word = substring + char_sym.to_s
+      # if this new 'word' is flagged a word, add to suggestions
+      suggestions << word if node.is_word
+      # add array of suggestions of everything below it
       suggestions + suggest(word)
     end
   end
+
+ def sort_hashes_by_frequency(node)
+   node.frequent.sort_by do |word, count|
+     count
+   end
+ end
+
+
+
+
 
 
   # --- Select ---
