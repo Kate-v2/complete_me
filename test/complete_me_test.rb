@@ -105,6 +105,21 @@ class CompleteMeTest < Minitest::Test
   end
 
 
+   def test_it_can_count
+    # -- Test with small array --
+    complete_me_1 = CompleteMe.new()
+    test_array = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
+    complete_me_1.populate(test_array)
+    assert_equal 6, complete_me_1.count
+
+    # -- Test with whole dictionary (a string) --
+    complete_me_2 = CompleteMe.new()
+    dictionary = File.read("/usr/share/dict/words")
+    complete_me_2.populate(dictionary)
+    assert_equal 235886, complete_me_2.count
+  end
+
+
   #  ---------------------------------------------
   # select
 
@@ -162,6 +177,15 @@ class CompleteMeTest < Minitest::Test
 
     assert_equal node_4, complete.find("cat", node_1)
   end
+
+
+  def test_if_it_can_suggest
+    complete_me = CompleteMe.new()
+    dictionary = File.read("/usr/share/dict/words")
+    complete_me.populate(dictionary)
+    expected = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"], complete_me.suggest("piz")
+  end
+
 
   def test_it_can_match_a_prefix_with_a_frequently_selected_word
     complete = CompleteMe.new
@@ -222,15 +246,5 @@ class CompleteMeTest < Minitest::Test
     complete.select("ca", "catch")
     assert_equal 2, node_6.weight
   end
-
-
-
-
-
-
-
-
-
-
 
 end
