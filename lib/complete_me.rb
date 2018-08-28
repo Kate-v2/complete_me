@@ -40,6 +40,8 @@ class CompleteMe
     end
   end
 
+  # --- Count ---
+
   def count(node = @root)
   return 0 if node.nodes.size == 0
   sum = 0
@@ -53,16 +55,12 @@ class CompleteMe
   sum
 end
 
-  # -----------------------------
-  # Select(prefix, word)
-
+  # --- Select ---
 
   def select(prefix, word)
-    # prefix - add a :word => count hash  +=
-    # find_word(word) ---> return end node
-    # word_node --> weight +=
+    match_prefix(prefix, word)
+    add_weight(word)
   end
-
 
   def find(string, node)
     return node if string.size == 0
@@ -72,13 +70,17 @@ end
     find(substring, node)
   end
 
-  def match_prefix
-    # TO DO - node.rb - add instance var for frequently selected
-    # TO DO - node.rb - add instance var for weight (incremented at is_word node)
-    # TO DO - add node_tests
+  def match_prefix(prefix, word)
+    node = find(prefix, @root)
+    hash = node.frequent
+    key = word.to_sym
+    hash[key] == nil ? hash[key] = 1 : hash[key] += 1
   end
 
-
+  def add_weight(word)
+    node = find(word, @root)
+    node.weight += 1
+  end
 
 end
 
