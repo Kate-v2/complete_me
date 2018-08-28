@@ -41,17 +41,21 @@ class CompleteMe
   end
 
   def count(node = @root)
-  return 0 if node.nodes.size == 0
-  sum = 0
-  node.nodes.values.each do |node|
-        #binding.pry
-    if node.is_word
-      sum += 1
+    # base case, if there are no more nodes
+    return 0 if node.nodes.size == 0
+    # sum up everything => block will return sum
+    node.nodes.values.inject(0) do |sum, node|
+      # add one if the node is a word
+      sum += 1 if node.is_word
+      # add to the count of everything below it in Trie
+      sum += count(node)
     end
-    sum += count(node)
   end
-  sum
-end
+
+  def suggest(substring)
+
+
+  end
 
   # -----------------------------
   # Select(prefix, word)
