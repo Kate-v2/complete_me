@@ -40,6 +40,8 @@ class CompleteMe
     end
   end
 
+  # --- Count ---
+
   def count(node = @root)
   return 0 if node.nodes.size == 0
   sum = 0
@@ -53,15 +55,12 @@ class CompleteMe
   sum
 end
 
-  # -----------------------------
-  # Select(prefix, word)
-
+  # --- Select ---
 
   def select(prefix, word)
     match_prefix(prefix, word)
     add_weight(word)
   end
-
 
   def find(string, node)
     return node if string.size == 0
@@ -82,8 +81,6 @@ end
     node = find(word, @root)
     node.weight += 1
   end
-
-
 
 end
 
