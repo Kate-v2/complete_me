@@ -61,7 +61,6 @@ class CompleteMe
     unweighted = unweighted_suggest(substring, node)
     sorted_hashes = sort_hashes_by_frequency(node)
     sorted_words = get_words_from_sorted_hashes(sorted_hashes)
-    binding.pry
     (sorted_words + unweighted).uniq
   end
 
