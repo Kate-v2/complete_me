@@ -72,6 +72,12 @@ end
     find(substring, node)
   end
 
+  def match_prefix
+    # TO DO - node.rb - add instance var for frequently selected
+    # TO DO - node.rb - add instance var for weight (incremented at is_word node)
+    # TO DO - add node_tests
+  end
+
 
 
 end
