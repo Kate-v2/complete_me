@@ -54,21 +54,15 @@ class CompleteMe
     end
   end
 
+  # --- Suggest ---
+
   def suggest(substring)
     node = find(substring, @root)
-    #base case
-    return [] if node.nodes.size == 0
-
     unweighted = unweighted_suggest(substring, node)
-
-    sorted_hashes = sort_hashes_by_frequency(word)
-
-    sorted_words_by_count = sorted_hashes.map do |hash_array|
-      hash_array[0].to_s
-    end
-
-    (sorted_words_by_count + unweighted).uniq
-
+    sorted_hashes = sort_hashes_by_frequency(node)
+    sorted_words = get_words_from_sorted_hashes(sorted_hashes)
+    binding.pry
+    (sorted_words + unweighted).uniq
   end
 
   def unweighted_suggest(substring, node)
@@ -82,17 +76,21 @@ class CompleteMe
       # if this new 'word' is flagged a word, add to suggestions
       suggestions << word if node.is_word
       # add array of suggestions of everything below it
-      suggestions + suggest(word)
+      suggestions + unweighted_suggest(word, node)
     end
   end
 
- def sort_hashes_by_frequency(node)
-   node.frequent.sort_by do |word, count|
-     count
-   end
- end
+  def sort_hashes_by_frequency(node)
+    node.frequent.sort_by do |word, count|
+      count
+    end.reverse
+  end
 
-
+  def get_words_from_sorted_hashes(sorted_hashes)
+    sorted_hashes.map do |hash_array|
+      hash_array[0].to_s
+    end
+  end
 
 
 
@@ -130,12 +128,11 @@ end
 # test_library = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
 #
 #
-complete_me = CompleteMe.new()
-
-dictionary = File.read("/usr/share/dict/words")
-complete_me.populate(dictionary)
-
-suggestions = complete_me.suggest("piz")
-p suggestions[0..4]
+# complete_me = CompleteMe.new()
+#
+# dictionary = File.read("/usr/share/dict/words")
+# complete_me.populate(dictionary)
+#
+# suggestions = complete_me.suggest("piz")
 
 #binding.pry
