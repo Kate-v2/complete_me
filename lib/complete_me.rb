@@ -92,18 +92,80 @@ class CompleteMe
     node.weight += 1
   end
 
+  # --- Delete ---
+
+
+    # REFACTOR
+    # -- RECURSIVE --
+    # If I do it recursively, I can pass back falses, until I hit true and change that node
+    # **************************************************
+    #  DETECT & FIND ENUMERABLES
+    # https://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-detect
+
+    # .detect will find the first node where my conditions are true
+
+    # **************************************************
+
+
+    # ** LOGIC ? ****************************************
+    # if it's a word keep it
+    # IT CAN BE a word without it being the deepest that can be deleted
+
+    # it can be a word and go deeper
+    # it can have no following words and be a word
+
+    # it cannot be important if it's not a word and points to no words
+    # **************************************************
+
+  def delete(word)
+    unflag_word(word)
+    return if assess_from_root(word)  # .each cannot capture a dead end at root
+    # when handling this case here, you can iterate over
+    # each letter using the next letter/node
+
+    set = delete_instructions(word.chars)
+    prefix = set[:prefix]
+    # node = find(set[:prefix], @root)
+    node = set[:node]
+    key = set[:delete].to_sym
+    node.nodes.delete(key)
+  end
+
+  # detect # the first node that points to a false
+  def delete_instructions(letters)
+    index = 0
+    letters.each { |l|
+      prefix = letters[0..index].join
+      current_node = find(prefix, @root)
+      next_index = index + 1
+      next_letter = letters[next_index]
+      next_node = find(next_letter, current_node)
+      if node_impact?(next_node) == false
+        hash = {prefix: prefix, node: current_node, :delete => next_letter}
+        return hash
+      end
+      index += 1
+    }
+  end
+
+  def assess_from_root(word)
+    key = word[0].to_sym
+    if node_impact?(@root.nodes[key]) == false
+      @root.nodes.delete(word[0].to_sym)
+    end
+  end
+
+  def node_impact?(node)
+    a_word = node.is_word
+    leads_to_words = count(node)
+    a_word == false && leads_to_words == 0 ? false : true
+    # false = node is useless
+    # true = node is important
+  end
+
+  def unflag_word(word)
+    node = find(word, @root)
+    node.is_word = false
+  end
+
 end
-
-#
-# test_library = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
-#
-#
-complete_me = CompleteMe.new()
-
-dictionary = File.read("/usr/share/dict/words")
-complete_me.populate(dictionary)
-
-suggestions = complete_me.suggest("piz")
-p suggestions[0..4]
-
-#binding.pry

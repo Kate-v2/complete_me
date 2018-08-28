@@ -145,7 +145,8 @@ class CompleteMeTest < Minitest::Test
     # No selections yet
     assert_equal "ca", [node_1.nodes.keys, node_2.nodes.keys].join
     assert_equal 0, node_6.weight
-    assert_equal nil , node_3.frequent[:catch]
+    # assert_equal nil , node_3.frequent[:catch]
+    assert_nil node_3.frequent[:catch]
 
     complete.select("ca", "catch")
     assert_equal 1, node_6.weight
@@ -208,7 +209,7 @@ class CompleteMeTest < Minitest::Test
 
     # No selections yet
     assert_equal "ca", [node_1.nodes.keys, node_2.nodes.keys].join
-    assert_equal nil , node_3.frequent[:catch]
+    assert_nil node_3.frequent[:catch]
 
     complete.select("ca", "catch")
     assert_equal 1 , node_3.frequent[:catch]
@@ -246,5 +247,73 @@ class CompleteMeTest < Minitest::Test
     complete.select("ca", "catch")
     assert_equal 2, node_6.weight
   end
+
+  # --- Delete ---
+  def test_it_can_delete_a_word
+    complete = CompleteMe.new
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
+    node_5 = Node.new   # via :c
+    node_6 = Node.new   # via :h  --> is_word
+
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+    node_4.nodes[:c] = node_5
+    node_5.nodes[:h] = node_6
+    node_6.is_word = true
+
+
+    assert_equal node_5, node_4.nodes[:c]
+    assert_equal node_5, node_5
+    assert_equal node_6, node_6
+
+    complete.delete("catch")
+
+    assert_nil node_1.nodes[:c].nodes[:a].nodes[:t].nodes[:c]
+    # cannot run tests on non-existing things
+    # since this node no longer points to another,
+    # (the via :h) I cannot test what previously existed
+  end
+
+  def test_it_can_unflag_a_word
+    complete = CompleteMe.new
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
+    node_5 = Node.new   # via :c
+    node_6 = Node.new   # via :h  --> is_word
+
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+    node_4.nodes[:c] = node_5
+    node_5.nodes[:h] = node_6
+    node_6.is_word = true
+
+    # -- before --
+    assert_equal true, node_4.is_word
+    assert_equal true, node_6.is_word
+    # -- after --
+    complete.unflag_word("cat")
+    assert_equal false, node_4.is_word
+    assert_equal true, node_6.is_word
+  end
+
+  def test_it_can_classify_a_node
+    # ############################
+    # ############################
+    skip
+    # ############################
+    # ############################
+  end
+
 
 end
