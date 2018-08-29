@@ -24,26 +24,11 @@ class CompleteMeTest < Minitest::Test
     assert_equal actual, complete.root.nodes
   end
 
-  def test_it_can_insert_a_word
-    complete = CompleteMe.new
-    actual = complete.insert("cat")
-
-    # Move through nodes via their pointer hash
-    nodes1 = complete.root.nodes
-    nodes2 = nodes1[:c].nodes
-    nodes3 = nodes2[:a].nodes
-
-    assert_equal [:c], nodes1.keys
-    assert_equal [:a], nodes2.keys
-    assert_equal [:t], nodes3.keys
-    assert_equal true, nodes3[:t].is_word
-  end
-
   def test_it_can_insert_words_recursively
     complete = CompleteMe.new
 
     # -- Create all new nodes --
-    complete.inserting("cat", complete.root)
+    complete.insert("cat", complete.root)
     # Create and move through nodes via their pointer hash
     new_nodes_nodes1 = complete.root.nodes
     new_nodes_nodes2 = new_nodes_nodes1[:c].nodes
@@ -55,7 +40,7 @@ class CompleteMeTest < Minitest::Test
     assert_equal true, new_nodes_nodes3[:t].is_word
 
     # -- Iteract with mixed existing nodes --
-    complete.inserting("catch", complete.root)
+    complete.insert("catch", complete.root)
     # Assess nodes, possibly create, and move through trie
     mixed_nodes_nodes1 = complete.root.nodes
     mixed_nodes_nodes2 = mixed_nodes_nodes1[:c].nodes

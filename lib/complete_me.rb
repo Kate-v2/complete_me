@@ -10,18 +10,13 @@ class CompleteMe
     @root = Node.new
   end
 
-  def insert(word)
-    node = @root
-    inserting(word, node)
-  end
-
-  def inserting(word, node)
+  def insert(word, node = @root)
     return if word.size == 0
     key = word[0].to_sym
     substring = word[1..word.length]
     node.exists?(key) ? node = node.nodes[key] : node = node.add_node(key)
     node.is_word = true if word.length == 1
-    inserting(substring, node)
+    insert(substring, node)
   end
 
   def populate(input)
