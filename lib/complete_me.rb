@@ -117,16 +117,16 @@ class CompleteMe
     # it cannot be important if it's not a word and points to no words
     # **************************************************
 
-  def delete(word)
-    unflag_word(word)
-    return if assess_from_root(word)  # .each cannot capture a dead end at root
-    hash = delete_instructions(word.chars)
-    delete_map(hash)
-  end
+  # def delete(word)
+  #   unflag_word(word)
+  #   return if assess_from_root(word)  # .each cannot capture a dead end at root
+  #   hash = delete_instructions(word.chars)
+  #   delete_map(hash)
+  # end
 
   # RECURSIVE rewrite
   # ----------------------------
-    def del(word)
+    def delete(word)
       # Need to unflag word, but only want to run it once
       unflag_word(word)
       return if assess_from_root(word)  # .each cannot capture a dead end at root
@@ -138,8 +138,16 @@ class CompleteMe
     return if word.size == 0
     node = find(word, @root)
     prefix = word[0..-2]
-    delete_logic(word, prefix, previous, node)
-    # if node_impact?(node) == false
+    # ------------
+    # delete_logic(word, prefix, previous, node)
+    # ------------
+    if active_path?(node) == false
+      backtrace_trie(word, prefix, previous)
+    else
+      delete_at_key(previous[-1].to_sym, node)
+    end
+
+    # if active_path?(node) == false
     #   previous << word[-1]
     #   deleting(prefix, previous) # moves back a node
     # else
@@ -148,15 +156,25 @@ class CompleteMe
     # end
   end
 
-  def delete_logic(word, prefix, previous, node)
-    if node_impact?(node) == false
-      previous << word[-1]
-      deleting(prefix, previous) # moves back a node
-    else
-      key = previous[-1].to_sym
-      node.nodes.delete(key)
-    end
+  # def delete_logic(word, prefix, previous, node)
+  #   if active_path?(node) == false
+  #     previous << word[-1]
+  #     deleting(prefix, previous) # moves back a node
+  #   else
+  #     key = previous[-1].to_sym
+  #     node.nodes.delete(key)
+  #   end
+  # end
+
+  def backtrace_trie(word, prefix, previous)
+    previous << word[-1]
+    deleting(prefix, previous)
   end
+
+  def delete_at_key(key, node)
+    node.nodes.delete(key)
+  end
+
   # -----------------------------------
 
 
@@ -170,7 +188,7 @@ class CompleteMe
       next_index = index + 1
       next_letter = letters[next_index]
       next_node = find(next_letter, current_node)
-      if node_impact?(next_node) == false
+      if active_path?(next_node) == false
         hash = {prefix: prefix, node: current_node, :delete => next_letter}
         # binding.pry
         return hash
@@ -190,12 +208,12 @@ class CompleteMe
 
   def assess_from_root(word)
     key = word[0].to_sym
-    if node_impact?(@root.nodes[key]) == false
+    if active_path?(@root.nodes[key]) == false
       @root.nodes.delete(word[0].to_sym)
     end
   end
 
-  def node_impact?(node)
+  def active_path?(node)
     a_word = node.is_word
     leads_to_words = count(node)
     a_word == false && leads_to_words == 0 ? false : true
