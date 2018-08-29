@@ -195,32 +195,61 @@ class CompleteMeTest < Minitest::Test
     assert_equal node_4, complete.find("cat", node_1)
   end
 
+  # --- Suggest ---
 
   def test_if_it_can_find_unweighted_suggestions
-    complete_me = CompleteMe.new()
+    # -- for dictionary --
+    complete_me_1 = CompleteMe.new()
     dictionary = File.read("/usr/share/dict/words")
-    complete_me.populate(dictionary)
-    substring = "piz"
-    node = complete_me.find(substring, complete_me.root)
-    expected = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"]
-    assert_equal expected, complete_me.unweighted_suggest(substring, node)
+    complete_me_1.populate(dictionary)
+    substring_1 = "piz"
+    node_1 = complete_me_1.find(substring_1, complete_me_1.root)
+    expected_1 = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"]
+    assert_equal expected_1, complete_me_1.unweighted_suggest(substring_1, node_1)
+
+    # -- for address CSV --
+    complete_me_2 = CompleteMe.new()
+    addresses = File.read("./data/addresses.csv")
+    complete_me_2.populate(addresses)
+    substring_2 = "333"
+    node_2 = complete_me_2.find(substring_2, complete_me_2.root)
+    expected_2 = ["333 W Colfax Ave", "333 W Ellsworth Ave", "333 W Bayaud Ave", "333 W Vassar Ave", "333 W 48th Ave"]
+    assert_equal expected_2, complete_me_2.unweighted_suggest(substring_2, node_2)[0..4]
   end
 
   def test_it_can_suggest_based_on_frequency
-    complete_me = CompleteMe.new
+    # -- for dictionary --
+    complete_me_1 = CompleteMe.new
     dictionary = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"]
-    complete_me.populate(dictionary)
-    complete_me.select("piz", "pizzeria")
-    complete_me.select("piz", "pizzeria")
-    complete_me.select("piz", "pizzeria")
+    complete_me_1.populate(dictionary)
+    complete_me_1.select("piz", "pizzeria")
+    complete_me_1.select("piz", "pizzeria")
+    complete_me_1.select("piz", "pizzeria")
     expected_1 = ["pizzeria", "pize", "pizza", "pizzicato", "pizzle"]
-    assert_equal expected_1, complete_me.suggest("piz")
+    assert_equal expected_1, complete_me_1.suggest("piz")
 
-    complete_me.select("pi", "pizza")
-    complete_me.select("pi", "pizza")
-    complete_me.select("pi", "pizzicato")
+    complete_me_1.select("pi", "pizza")
+    complete_me_1.select("pi", "pizza")
+    complete_me_1.select("pi", "pizzicato")
     expected_2 = ["pizza", "pizzicato", "pize", "pizzeria", "pizzle"]
-    assert_equal expected_2, complete_me.suggest("pi")
+    assert_equal expected_2, complete_me_1.suggest("pi")
+
+    # -- for address CSV --
+    complete_me_2 = CompleteMe.new
+    test_file = ["333 W Colfax Ave", "333 W Ellsworth Ave", "333 W Bayaud Ave", "333 W Vassar Ave", "333 W 48th Ave"]
+    complete_me_2.populate(test_file)
+    complete_me_2.select("333", "333 W Vassar Ave")
+    complete_me_2.select("333", "333 W Vassar Ave")
+    complete_me_2.select("333", "333 W Vassar Ave")
+    expected_3 = ["333 W Vassar Ave", "333 W Colfax Ave", "333 W Ellsworth Ave", "333 W Bayaud Ave", "333 W 48th Ave"]
+    assert_equal expected_3, complete_me_2.suggest("333")
+
+    complete_me_2.select("33", "333 W Ellsworth Ave")
+    complete_me_2.select("33", "333 W Ellsworth Ave")
+    complete_me_2.select("33", "333 W 48th Ave")
+    expected_4 = ["333 W Ellsworth Ave", "333 W 48th Ave", "333 W Colfax Ave", "333 W Bayaud Ave", "333 W Vassar Ave"]
+    assert_equal expected_4, complete_me_2.suggest("33")
+
   end
 
   def test_it_can_sort_hashes_by_frequency
