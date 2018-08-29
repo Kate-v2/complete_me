@@ -104,17 +104,19 @@ class CompleteMe
   def deleting(word, previous = [])
     return if word.size == 0
     node = find(word, @root)
-    if active_path?(node) == false
-      backtrack(word, word[0..-2], previous)
+    case active_path?(node)
+    when false
+      previous << word[-1]
+      deleting(word[0..-2], previous)
     else
       node.nodes.delete(previous[-1].to_sym)
     end
   end
 
-  def backtrack(word, prefix, previous)
-    previous << word[-1]
-    deleting(prefix, previous)
-  end
+  # def backtrack(word, prefix, previous)
+  #   # previous << word[-1]
+  #   # deleting(prefix, previous)
+  # end
 
   def assess_from_root(word)
     key = word[0].to_sym
@@ -127,8 +129,7 @@ class CompleteMe
     a_word = node.is_word
     leads_to_words = count(node)
     a_word == false && leads_to_words == 0 ? false : true
-    # false = node is useless
-    # true = node is important
+    # false = node is useless  # true = node is important
   end
 
   def unflag_word(word)
