@@ -39,6 +39,8 @@ class CompleteMe
       nil
     end
   end
+  
+  
 
   # --- Count ---
 
@@ -54,6 +56,8 @@ class CompleteMe
     end
   end
 
+  
+  
   # --- Suggest ---
 
   def suggest(substring)
@@ -93,7 +97,6 @@ class CompleteMe
 
 
 
-
   # --- Select ---
 
   def select(prefix, word)
@@ -120,18 +123,49 @@ class CompleteMe
     node = find(word, @root)
     node.weight += 1
   end
+  
+  
 
+  # --- Delete ---
+
+  def delete(word)
+    unflag_word(word)
+    return if assess_from_root(word)
+    return if active_path?(find(word, @root))
+    deleting(word)
+  end
+
+  # starts at last node for word and works back
+  def deleting(word, previous = [])
+    return if word.size == 0
+    node = find(word, @root)
+    case active_path?(node)
+    when false
+      previous << word[-1]
+      deleting(word[0...word.size-1], previous)
+    else
+      key = previous[-1].to_sym
+      node.nodes.reject!{|k, v| k == key }
+    end
+  end
+
+  def assess_from_root(word)
+    key = word[0].to_sym
+    if active_path?(@root.nodes[key]) == false
+      @root.nodes.delete(word[0].to_sym)
+    end
+  end
+
+  def active_path?(node)
+    a_word = node.is_word
+    leads_to_words = count(node)
+    a_word || leads_to_words > 0
+    # false = node is useless  # true = node is important
+  end
+
+  def unflag_word(word)
+    node = find(word, @root)
+    node.is_word = false
+  end
+  
 end
-
-#
-# test_library = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
-#
-#
-# complete_me = CompleteMe.new()
-#
-# dictionary = File.read("/usr/share/dict/words")
-# complete_me.populate(dictionary)
-#
-# suggestions = complete_me.suggest("piz")
-
-#binding.pry
