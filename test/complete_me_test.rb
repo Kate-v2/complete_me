@@ -179,13 +179,49 @@ class CompleteMeTest < Minitest::Test
   end
 
 
-  def test_if_it_can_suggest
+  def test_if_it_can_find_unweighted_suggestions
     complete_me = CompleteMe.new()
     dictionary = File.read("/usr/share/dict/words")
     complete_me.populate(dictionary)
-    expected = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"], complete_me.suggest("piz")
+    substring = "piz"
+    node = complete_me.find(substring, complete_me.root)
+    expected = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"]
+    assert_equal expected, complete_me.unweighted_suggest(substring, node)
   end
 
+  def test_it_can_suggest_based_on_frequency
+    complete_me = CompleteMe.new
+    dictionary = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle"]
+    complete_me.populate(dictionary)
+    complete_me.select("piz", "pizzeria")
+    complete_me.select("piz", "pizzeria")
+    complete_me.select("piz", "pizzeria")
+    expected_1 = ["pizzeria", "pize", "pizza", "pizzicato", "pizzle"]
+    assert_equal expected_1, complete_me.suggest("piz")
+
+    complete_me.select("pi", "pizza")
+    complete_me.select("pi", "pizza")
+    complete_me.select("pi", "pizzicato")
+    expected_2 = ["pizza", "pizzicato", "pize", "pizzeria", "pizzle"]
+    assert_equal expected_2, complete_me.suggest("pi")
+  end
+
+  def test_it_can_sort_hashes_by_frequency
+    complete = CompleteMe.new
+    node = Node.new()
+    node.frequent[:a] = 1
+    node.frequent[:b] = 3
+    node.frequent[:c] = 2
+    test_hash = {:a => 1, :b => 3, :c => 2}
+    assert_equal test_hash, node.frequent
+    assert_equal [[:b, 3], [:c, 2], [:a, 1]], complete.sort_hashes_by_frequency(node)
+  end
+
+  def test_it_can_get_words_from_sorted_hashes
+    complete = CompleteMe.new
+    sorted_hashes = [[:pi, 3], [:piz, 2], [:pize, 1]]
+    assert_equal ["pi", "piz", "pize"], complete.get_words_from_sorted_hashes(sorted_hashes)
+  end
 
   def test_it_can_match_a_prefix_with_a_frequently_selected_word
     complete = CompleteMe.new
