@@ -106,6 +106,32 @@ class CompleteMeTest < Minitest::Test
     assert_equal ["cat", "catch"], complete.to_array(list_already_array)
   end
 
+  def test_it_can_populate_from_CSV
+    complete = CompleteMe.new
+    addresses = File.read("./data/addresses.csv")
+    assert_equal 0, complete.count
+    complete.populate(addresses)
+    assert_equal 313500, complete.count
+    # 313539 is number of address but there are redundancies and a header row
+  end
+
+  def test_it_can_convert_CSV_to_array
+    complete = CompleteMe.new
+    addresses = File.read("./data/addresses.csv")
+    assert_equal 313500, complete.to_array(addresses).uniq.count
+    # 313539 is number of address but there are redundancies and a header row
+  end
+
+  def test_it_can_create_an_array_of_specific_column_values
+    complete = CompleteMe.new
+    set_1 = [1, 2, 3]
+    set_2 = [4, 5, 6]
+    set_3 = [7, 8, 9]
+    set = [set_1, set_2, set_3]
+    small_array = complete.map_by_array_index(set, 1)
+    assert_equal [2, 5, 8], small_array
+  end
+
 
   # --- Count ---
 

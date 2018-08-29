@@ -1,4 +1,6 @@
 require 'pry'
+
+require 'CSV'
 require './lib/node'
 
 class CompleteMe
@@ -30,17 +32,24 @@ class CompleteMe
   end
 
   def to_array(input)
-    case input
-    when String
+    if input.include?("\r\n") # CSV
+      arrs = CSV.parse(input)
+      arrs.shift  # remove headers
+      map_by_array_index(arrs, -1)  #only use Full Address column
+    elsif input.class == String
       input.split("\n")
-    when Array
+    elsif input.class == Array
       input
     else
       nil
     end
   end
-  
-  
+
+  def map_by_array_index(array_of_arrays, index)
+    array_of_arrays.map do |arr|
+      arr[index]
+    end
+  end
 
   # --- Count ---
 
@@ -56,8 +65,8 @@ class CompleteMe
     end
   end
 
-  
-  
+
+
   # --- Suggest ---
 
   def suggest(substring)
@@ -123,8 +132,8 @@ class CompleteMe
     node = find(word, @root)
     node.weight += 1
   end
-  
-  
+
+
 
   # --- Delete ---
 
@@ -167,5 +176,5 @@ class CompleteMe
     node = find(word, @root)
     node.is_word = false
   end
-  
+
 end
