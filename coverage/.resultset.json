@@ -1,0 +1,29 @@
+{
+  "Unit Tests": {
+    "coverage": {
+      "/Users/kt/turing/1module/projects/complete_me/lib/node.rb": [
+        1,
+        1,
+        null,
+        1,
+        5,
+        5,
+        5,
+        5,
+        null,
+        null,
+        1,
+        2,
+        null,
+        null,
+        1,
+        1,
+        1,
+        null,
+        null,
+        null
+      ]
+    },
+    "timestamp": 1535561399
+  }
+}

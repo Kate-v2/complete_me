@@ -1,5 +1,7 @@
 require 'pry'
 
+require_relative 'test_helper'   # require test_helper first
+
 require "minitest/autorun"
 require "minitest/pride"
 
