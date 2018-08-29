@@ -106,6 +106,7 @@ class CompleteMeTest < Minitest::Test
 
 
    def test_it_can_count
+
     # -- Test with small array --
     complete_me_1 = CompleteMe.new()
     test_array = ["pize", "pizza", "pizzeria", "pizzicato", "pizzle", "zebra"]
@@ -250,6 +251,7 @@ class CompleteMeTest < Minitest::Test
 
   # --- Delete ---
   def test_it_can_delete_a_word
+    skip
     complete = CompleteMe.new
     # -- add "cat" & "catch" to trie, manually --
     node_1 = complete.root   # root
@@ -280,38 +282,8 @@ class CompleteMeTest < Minitest::Test
     assert_nil node_1.nodes[:c].nodes[:a].nodes[:t].nodes[:c]
   end
 
-  # def test_it_can_delete_a_word
-  #   complete = CompleteMe.new
-  #   # -- add "cat" & "catch" to trie, manually --
-  #   node_1 = complete.root   # root
-  #   node_2 = Node.new   # via :c
-  #   node_3 = Node.new   # via :a
-  #   node_4 = Node.new   # via :t  --> is_word
-  #   node_5 = Node.new   # via :c
-  #   node_6 = Node.new   # via :h  --> is_word
-  #
-  #   node_1.nodes[:c] = node_2
-  #   node_2.nodes[:a] = node_3
-  #   node_3.nodes[:t] = node_4
-  #   node_4.is_word = true
-  #   node_4.nodes[:c] = node_5
-  #   node_5.nodes[:h] = node_6
-  #   node_6.is_word = true
-  #
-  #   # -- Before --
-  #   assert_equal node_5, node_4.nodes[:c]
-  #   assert_equal node_5, node_5
-  #   assert_equal node_6, node_6
-  #
-  #   complete.del("catch")
-  #   # -- After --
-  #   # still exists
-  #   assert_equal node_2.nodes[:a], node_3
-  #   # earliest useless node is deleted (via :c)
-  #   assert_nil node_1.nodes[:c].nodes[:a].nodes[:t].nodes[:c]
-  # end
-
-  def test_it_can_give_deletion_instructions
+  def test_it_can_delete_a_word_recursively
+    # KT_HERE
     skip
     complete = CompleteMe.new
     # -- add "cat" & "catch" to trie, manually --
@@ -330,20 +302,73 @@ class CompleteMeTest < Minitest::Test
     node_5.nodes[:h] = node_6
     node_6.is_word = true
 
-    # letters = "catch".chars
-    # binding.pry
-    complete.delete_instructions(["c", "a", "t", "c", "h"])
-    binding.pry
+    # -- Before --
+    assert_equal node_5, node_4.nodes[:c]
+    assert_equal node_5, node_5
+    assert_equal node_6, node_6
 
-    hash = {prefix: "cat", node: node_4, :delete => "c"}
-    assert_equal hash, complete.delete_instructions(letters)
+    # must unflag word to delete
+    node_6.is_word = false
+    complete.deleting("catch")
+    # -- After --
+    # still exists
+    assert_equal node_2.nodes[:a], node_3
+    # earliest useless node is deleted (via :c)
+    assert_nil node_1.nodes[:c].nodes[:a].nodes[:t].nodes[:c]
+  end
 
+  def test_it_can_assess_if_a_path_needs_to_exist_from_the_root
+    skip
+    complete = CompleteMe.new
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
 
+    node_1.nodes[:z] = Node.new
+
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+
+    leads_to_words = complete.assess_from_root("z")
+    assert_equal false, leads_to_words
   end
 
 
 
+  def test_program_works_with_dictionary
+    complete = CompleteMe.new
+    complete.populate(File.read("/usr/share/dict/words"))
+    before = complete.count
 
+    complete.delete("trying")
+    after = complete.count
+    assert_equal 1, (before - after)
+
+    complete.delete("Zyzomys")
+    after2 = complete.count
+    assert_equal 2, (before - after2)
+    assert_nil complete.find("Zyzo", complete.root)
+    # can't do xyz on NilClass:Nil if you search
+    # deeper than this for the rest of the deleted nodes
+  end
+
+  def test_find_word_in_dictionary
+    skip
+    complete = CompleteMe.new
+    complete.populate(File.read("/usr/share/dict/words"))
+    complete.count
+
+    node = complete.find("trying", complete.root)
+    node.is_word
+
+    complete.delete("trying")
+
+    assert_equal false, node.is_word
+  end
 
 
 
