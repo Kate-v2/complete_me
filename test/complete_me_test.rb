@@ -105,6 +105,8 @@ class CompleteMeTest < Minitest::Test
   end
 
 
+  # --- Count ---
+
    def test_it_can_count
 
     # -- Test with small array --
@@ -121,8 +123,8 @@ class CompleteMeTest < Minitest::Test
   end
 
 
-  #  ---------------------------------------------
-  # select
+
+  # --- Select ---
 
   def test_it_can_select_a_word
     complete = CompleteMe.new
@@ -249,9 +251,10 @@ class CompleteMeTest < Minitest::Test
     assert_equal 2, node_6.weight
   end
 
+
   # --- Delete ---
+
   def test_it_can_delete_a_word
-    skip
     complete = CompleteMe.new
     # -- add "cat" & "catch" to trie, manually --
     node_1 = complete.root   # root
@@ -283,8 +286,6 @@ class CompleteMeTest < Minitest::Test
   end
 
   def test_it_can_delete_a_word_recursively
-    # KT_HERE
-    skip
     complete = CompleteMe.new
     # -- add "cat" & "catch" to trie, manually --
     node_1 = complete.root   # root
@@ -317,8 +318,7 @@ class CompleteMeTest < Minitest::Test
     assert_nil node_1.nodes[:c].nodes[:a].nodes[:t].nodes[:c]
   end
 
-  def test_it_can_assess_if_a_path_needs_to_exist_from_the_root
-    skip
+  def test_it_can_assess_if_node_needs_to_be_deleted_from_the_root_and_deletes_it
     complete = CompleteMe.new
     # -- add "cat" & "catch" to trie, manually --
     node_1 = complete.root   # root
@@ -333,45 +333,52 @@ class CompleteMeTest < Minitest::Test
     node_3.nodes[:t] = node_4
     node_4.is_word = true
 
-    leads_to_words = complete.assess_from_root("z")
-    assert_equal false, leads_to_words
-  end
-
-
-
-  def test_program_works_with_dictionary
-    complete = CompleteMe.new
-    complete.populate(File.read("/usr/share/dict/words"))
-    before = complete.count
-
-    complete.delete("trying")
-    after = complete.count
-    assert_equal 1, (before - after)
-
-    complete.delete("Zyzomys")
-    after2 = complete.count
-    assert_equal 2, (before - after2)
-    assert_nil complete.find("Zyzo", complete.root)
-    # can't do xyz on NilClass:Nil if you search
-    # deeper than this for the rest of the deleted nodes
-  end
-
-  def test_find_word_in_dictionary
-    skip
-    complete = CompleteMe.new
-    complete.populate(File.read("/usr/share/dict/words"))
-    complete.count
-
-    node = complete.find("trying", complete.root)
-    node.is_word
-
-    complete.delete("trying")
-
+    # -- original node via :z path of root --
+    node = complete.find("z", complete.root)
     assert_equal false, node.is_word
+    empty = {}
+    assert_equal empty, node.nodes
+    # -- original root node attributes --
+    assert_equal [:z, :c], complete.root.nodes.keys
+    # -- node via :z path is not useful and gets deleted-
+    delete_at_root = complete.assess_from_root("z")
+    assert_nil node_1.nodes[:z]
+    assert_equal [:c], node_1.nodes.keys
   end
 
+  def test_it_can_determine_if_a_node_is_an_active_path_to_words
+    complete = CompleteMe.new
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
+    node_5 = Node.new   # via :c
+    node_6 = Node.new   # via :h  --> is_word
 
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+    node_4.nodes[:c] = node_5
+    node_5.nodes[:h] = node_6
+    node_6.is_word = true
 
+    # -- Before --
+    assert_equal node_5, node_4.nodes[:c]
+    assert_equal node_5, node_5
+    assert_equal node_6, node_6
+
+    assert_equal true, complete.active_path?(node_6)
+    assert_equal true, node_6.is_word # --> this is the end of "catch"
+
+    node_6.is_word = false
+    assert_equal false, node_6.is_word # --> "catch" is no longer a word ..
+    # and nodes via :c and via :h are no longer useful
+    assert_equal false, complete.active_path?(node_6)
+    assert_equal false, complete.active_path?(node_5)
+    assert_equal true, complete.active_path?(node_4) # --> "cat" is still a word
+  end
 
   def test_it_can_unflag_a_word
     complete = CompleteMe.new
@@ -399,6 +406,30 @@ class CompleteMeTest < Minitest::Test
     assert_equal false, node_4.is_word
     assert_equal true, node_6.is_word
   end
+
+
+  def test_delete_works_with_dictionary
+    complete = CompleteMe.new
+    complete.populate(File.read("/usr/share/dict/words"))
+    before = complete.count
+
+    # No Nodes get deleted (trying --> tryingly & tryingness)
+    node = complete.find("trying", complete.root)
+    assert_equal true, node.is_word
+
+    complete.delete("trying")
+    after = complete.count
+    assert_equal false, node.is_word
+    assert_equal 1, (before - after)
+
+    complete.delete("Zyzomys")
+    after2 = complete.count
+    assert_equal 2, (before - after2)
+    assert_nil complete.find("Zyzo", complete.root)
+    # can't do xyz on NilClass:Nil if you search
+    # deeper than this for the rest of the deleted nodes
+  end
+
 
 
 end
