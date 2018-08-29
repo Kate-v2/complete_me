@@ -138,6 +138,17 @@ class CompleteMe
     return if word.size == 0
     node = find(word, @root)
     prefix = word[0..-2]
+    delete_logic(word, prefix, previous, node)
+    # if node_impact?(node) == false
+    #   previous << word[-1]
+    #   deleting(prefix, previous) # moves back a node
+    # else
+    #   key = previous[-1].to_sym
+    #   node.nodes.delete(key)
+    # end
+  end
+
+  def delete_logic(word, prefix, previous, node)
     if node_impact?(node) == false
       previous << word[-1]
       deleting(prefix, previous) # moves back a node
