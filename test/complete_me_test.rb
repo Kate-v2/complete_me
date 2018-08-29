@@ -267,18 +267,86 @@ class CompleteMeTest < Minitest::Test
     node_5.nodes[:h] = node_6
     node_6.is_word = true
 
-
+    # -- Before --
     assert_equal node_5, node_4.nodes[:c]
     assert_equal node_5, node_5
     assert_equal node_6, node_6
 
     complete.delete("catch")
-
+    # -- After --
+    # still exists
+    assert_equal node_2.nodes[:a], node_3
+    # earliest useless node is deleted (via :c)
     assert_nil node_1.nodes[:c].nodes[:a].nodes[:t].nodes[:c]
-    # cannot run tests on non-existing things
-    # since this node no longer points to another,
-    # (the via :h) I cannot test what previously existed
   end
+
+  def test_it_can_delete_a_word
+    complete = CompleteMe.new
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
+    node_5 = Node.new   # via :c
+    node_6 = Node.new   # via :h  --> is_word
+
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+    node_4.nodes[:c] = node_5
+    node_5.nodes[:h] = node_6
+    node_6.is_word = true
+
+    # -- Before --
+    assert_equal node_5, node_4.nodes[:c]
+    assert_equal node_5, node_5
+    assert_equal node_6, node_6
+
+    complete.del("catch")
+    # -- After --
+    # still exists
+    assert_equal node_2.nodes[:a], node_3
+    # earliest useless node is deleted (via :c)
+    assert_nil node_1.nodes[:c].nodes[:a].nodes[:t].nodes[:c]
+  end
+
+  def test_it_can_give_deletion_instructions
+    skip
+    complete = CompleteMe.new
+    # -- add "cat" & "catch" to trie, manually --
+    node_1 = complete.root   # root
+    node_2 = Node.new   # via :c
+    node_3 = Node.new   # via :a
+    node_4 = Node.new   # via :t  --> is_word
+    node_5 = Node.new   # via :c
+    node_6 = Node.new   # via :h  --> is_word
+
+    node_1.nodes[:c] = node_2
+    node_2.nodes[:a] = node_3
+    node_3.nodes[:t] = node_4
+    node_4.is_word = true
+    node_4.nodes[:c] = node_5
+    node_5.nodes[:h] = node_6
+    node_6.is_word = true
+
+    # letters = "catch".chars
+    # binding.pry
+    complete.delete_instructions(["c", "a", "t", "c", "h"])
+    binding.pry
+
+    hash = {prefix: "cat", node: node_4, :delete => "c"}
+    assert_equal hash, complete.delete_instructions(letters)
+
+
+  end
+
+
+
+
+
+
+
 
   def test_it_can_unflag_a_word
     complete = CompleteMe.new
@@ -305,14 +373,6 @@ class CompleteMeTest < Minitest::Test
     complete.unflag_word("cat")
     assert_equal false, node_4.is_word
     assert_equal true, node_6.is_word
-  end
-
-  def test_it_can_classify_a_node
-    # ############################
-    # ############################
-    skip
-    # ############################
-    # ############################
   end
 
 

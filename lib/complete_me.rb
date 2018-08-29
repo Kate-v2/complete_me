@@ -120,16 +120,35 @@ class CompleteMe
   def delete(word)
     unflag_word(word)
     return if assess_from_root(word)  # .each cannot capture a dead end at root
-    # when handling this case here, you can iterate over
-    # each letter using the next letter/node
-
-    set = delete_instructions(word.chars)
-    prefix = set[:prefix]
-    # node = find(set[:prefix], @root)
-    node = set[:node]
-    key = set[:delete].to_sym
-    node.nodes.delete(key)
+    hash = delete_instructions(word.chars)
+    delete_map(hash)
   end
+
+  # RECURSIVE rewrite
+  # ----------------------------
+    def del(word)
+      # Need to unflag word, but only want to run it once
+      unflag_word(word)
+      return if assess_from_root(word)  # .each cannot capture a dead end at root
+      deleting(word)
+    end
+
+  # work backwards from word's node
+  def deleting(word, previous = [])
+    return if word.size == 0
+    node = find(word, @root)
+    prefix = word[0..-2]
+    if node_impact?(node) == false
+      previous << word[-1]
+      deleting(prefix, previous) # moves back a node
+    else
+      key = previous[-1].to_sym
+      node.nodes.delete(key)
+    end
+  end
+  # -----------------------------------
+
+
 
   # detect # the first node that points to a false
   def delete_instructions(letters)
@@ -142,11 +161,21 @@ class CompleteMe
       next_node = find(next_letter, current_node)
       if node_impact?(next_node) == false
         hash = {prefix: prefix, node: current_node, :delete => next_letter}
+        # binding.pry
         return hash
       end
       index += 1
     }
   end
+
+  def delete_map(hash)
+    prefix = hash[:prefix]
+    node = hash[:node]
+    key = hash[:delete].to_sym
+    node.nodes.delete(key)
+  end
+
+
 
   def assess_from_root(word)
     key = word[0].to_sym
