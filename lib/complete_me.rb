@@ -94,117 +94,27 @@ class CompleteMe
 
   # --- Delete ---
 
-
-    # REFACTOR
-    # -- RECURSIVE --
-    # If I do it recursively, I can pass back falses, until I hit true and change that node
-    # **************************************************
-    #  DETECT & FIND ENUMERABLES
-    # https://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-detect
-
-    # .detect will find the first node where my conditions are true
-
-    # **************************************************
-
-
-    # ** LOGIC ? ****************************************
-    # if it's a word keep it
-    # IT CAN BE a word without it being the deepest that can be deleted
-
-    # it can be a word and go deeper
-    # it can have no following words and be a word
-
-    # it cannot be important if it's not a word and points to no words
-    # **************************************************
-
-  # def delete(word)
-  #   unflag_word(word)
-  #   return if assess_from_root(word)  # .each cannot capture a dead end at root
-  #   hash = delete_instructions(word.chars)
-  #   delete_map(hash)
-  # end
-
-  # RECURSIVE rewrite
-  # ----------------------------
     def delete(word)
-      # Need to unflag word, but only want to run it once
       unflag_word(word)
-      return if assess_from_root(word)  # .each cannot capture a dead end at root
+      return if assess_from_root(word)
       deleting(word)
     end
 
-  # work backwards from word's node
+  # starts at last node for word and works back
   def deleting(word, previous = [])
     return if word.size == 0
     node = find(word, @root)
-    prefix = word[0..-2]
-    # ------------
-    # delete_logic(word, prefix, previous, node)
-    # ------------
     if active_path?(node) == false
-      backtrace_trie(word, prefix, previous)
+      backtrack(word, word[0..-2], previous)
     else
-      delete_at_key(previous[-1].to_sym, node)
+      node.nodes.delete(previous[-1].to_sym)
     end
-
-    # if active_path?(node) == false
-    #   previous << word[-1]
-    #   deleting(prefix, previous) # moves back a node
-    # else
-    #   key = previous[-1].to_sym
-    #   node.nodes.delete(key)
-    # end
   end
 
-  # def delete_logic(word, prefix, previous, node)
-  #   if active_path?(node) == false
-  #     previous << word[-1]
-  #     deleting(prefix, previous) # moves back a node
-  #   else
-  #     key = previous[-1].to_sym
-  #     node.nodes.delete(key)
-  #   end
-  # end
-
-  def backtrace_trie(word, prefix, previous)
+  def backtrack(word, prefix, previous)
     previous << word[-1]
     deleting(prefix, previous)
   end
-
-  def delete_at_key(key, node)
-    node.nodes.delete(key)
-  end
-
-  # -----------------------------------
-
-
-
-  # detect # the first node that points to a false
-  def delete_instructions(letters)
-    index = 0
-    letters.each { |l|
-      prefix = letters[0..index].join
-      current_node = find(prefix, @root)
-      next_index = index + 1
-      next_letter = letters[next_index]
-      next_node = find(next_letter, current_node)
-      if active_path?(next_node) == false
-        hash = {prefix: prefix, node: current_node, :delete => next_letter}
-        # binding.pry
-        return hash
-      end
-      index += 1
-    }
-  end
-
-  def delete_map(hash)
-    prefix = hash[:prefix]
-    node = hash[:node]
-    key = hash[:delete].to_sym
-    node.nodes.delete(key)
-  end
-
-
 
   def assess_from_root(word)
     key = word[0].to_sym
